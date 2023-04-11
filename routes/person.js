@@ -8,40 +8,28 @@ router.get('/persons', function (req, res) {
     .catch(err => console.log(err));
 });
 
-router.post('/person', function (req, res) {
+router.post('/person/post', function (req, res) {
   const { fn, ln, username, pwd } = req.body;
   const personData = new PersonModel({ fn, ln, username, pwd });
   personData.save()
-    .then(succ => res.json(succ))
+    .then(person => res.json(person))
     .catch(err => console.log(err));
 });
 
 router.post('/person/login', async function (req, res) {
-  // console.log(req.body);
-  // const { username, pwd } = req.body;
-  // try {
-  //   const person = await PersonModel.findOne({ username });
-  //   console.log(person);
-  //   if (person.pwd === pwd) {
-  //     res.json(person);
-  //   }
-  // }
-  // catch (err) {
-  //   res.json(err);
-  // }
 
   const { username, pwd } = req.body;
   PersonModel.findOne({ username })
     .then(person => {
-      if (person.pwd === pwd) {
-        console.log(person);
-        res.json(person);
-      }
-      else {
-        throw "error";
+      if (person && person.pwd === pwd) {
+        res.json({ person, message: "allow" });
+      } else if (person && person.pwd !== pwd) {
+        res.json({ message: "password_error" });
+      } else {
+        res.json({ message: "not_found" });
       }
     })
-    .catch(err => res.json(err));
+    .catch(err => res.json("promise_error"));
 });
 
 module.exports = router;
